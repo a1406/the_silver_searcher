@@ -235,6 +235,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "ackmate-dir-filter", required_argument, NULL, 0 },
         { "affinity", no_argument, &opts.use_thread_affinity, 1 },
         { "after", optional_argument, NULL, 'A' },
+        { "file-list", optional_argument, NULL, 'E' },		
         { "all-text", no_argument, NULL, 't' },
         { "all-types", no_argument, NULL, 'a' },
         { "before", optional_argument, NULL, 'B' },
@@ -372,7 +373,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
     }
 
     char *file_search_regex = NULL;
-    while ((ch = getopt_long(argc, argv, "A:aB:C:cDG:g:FfHhiLlm:nop:QRrSsvVtuUwW:z0", longopts, &opt_index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "A:aB:C:cDE:G:g:FfHhiLlm:nop:QRrSsvVtuUwW:z0", longopts, &opt_index)) != -1) {
         switch (ch) {
             case 'A':
                 if (optarg) {
@@ -421,13 +422,16 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
             case 'D':
                 set_log_level(LOG_LEVEL_DEBUG);
                 break;
+			case 'E':
+				opts.file_list = ag_strdup(optarg);
+				break;
             case 'f':
                 opts.follow_symlinks = 1;
                 break;
             case 'g':
                 needs_query = accepts_query = 0;
                 opts.match_files = 1;
-            /* fall through */
+            /* Fall through so regex is built */
             case 'G':
                 if (file_search_regex) {
                     log_err("File search regex (-g or -G) already specified.");
@@ -589,7 +593,6 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
                 }
 
                 log_err("option %s does not take a value", longopts[opt_index].name);
-            /* fall through */
             default:
                 usage();
                 exit(1);
@@ -826,7 +829,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         }
         /* Make sure we search these paths instead of stdin. */
         opts.search_stream = 0;
-    } else {
+    } else if (!opts.file_list) {
         path = ag_strdup(".");
         *paths = ag_malloc(sizeof(char *) * 2);
         *base_paths = ag_malloc(sizeof(char *) * 2);
@@ -838,7 +841,12 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         (*base_paths)[0] = realpath(path, NULL);
 #endif
         i = 1;
-    }
+    } else {
+        *paths = ag_malloc(sizeof(char *) * 1);
+        *base_paths = ag_malloc(sizeof(char *) * 1);
+		i = 0;
+	}
+		
     (*paths)[i] = NULL;
     (*base_paths)[i] = NULL;
 

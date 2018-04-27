@@ -197,6 +197,40 @@ int main(int argc, char **argv) {
             search_dir(ig, base_paths[i], paths[i], 0, s.st_dev);
             cleanup_ignore(ig);
         }
+		if (opts.file_list)
+		{
+			FILE *fp = fopen(opts.file_list, "r");
+			if (fp)
+			{
+				char filename[255];
+				while (fgets(filename, 254, fp))
+				{
+					int len = strlen(filename);
+					if (len <= 0)
+						continue;
+					if (filename[len - 1] == '\n')
+						filename[len - 1] = '\0';
+					log_debug("searching path %s for %s", filename, opts.query);
+					symhash = NULL;
+					ignores *ig = init_ignore(root_ignores, "", 0);
+					struct stat s = {.st_dev = 0 };
+#ifndef _WIN32
+						/* The device is ignored if opts.one_dev is false, so it's fine
+						 * to leave it at the default 0
+						 */
+					if (opts.one_dev && lstat(filename, &s) == -1) {
+						log_err("Failed to get device information for path %s. Skipping...", filename);
+					}
+#endif
+					char real_path[255];
+					realpath(filename, real_path);
+					search_dir(ig, real_path, filename, 0, s.st_dev);
+					cleanup_ignore(ig);
+				}
+				fclose(fp);
+			}
+		}
+		
         pthread_mutex_lock(&work_queue_mtx);
         done_adding_files = TRUE;
         pthread_cond_broadcast(&files_ready);

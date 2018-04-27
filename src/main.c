@@ -206,10 +206,13 @@ int main(int argc, char **argv) {
 				while (fgets(filename, 254, fp))
 				{
 					int len = strlen(filename);
-					if (len <= 0)
+					if (len <= 0 || filename[0] == '\0')
 						continue;
 					if (filename[len - 1] == '\n')
 						filename[len - 1] = '\0';
+					if (filename[0] == '\0')
+						continue;
+					
 					log_debug("searching path %s for %s", filename, opts.query);
 					symhash = NULL;
 					ignores *ig = init_ignore(root_ignores, "", 0);

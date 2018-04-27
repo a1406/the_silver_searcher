@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
 						log_err("Failed to get device information for path %s. Skipping...", filename);
 					}
 #endif
-					char real_path[255];
+					char real_path[PATH_MAX];
 					realpath(filename, real_path);
 					search_dir(ig, real_path, filename, 0, s.st_dev);
 					cleanup_ignore(ig);

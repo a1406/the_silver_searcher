@@ -203,17 +203,27 @@ int main(int argc, char **argv) {
 			if (fp)
 			{
 				char filename[255];
-				while (fgets(filename, 254, fp))
+				char *pfilename = &filename[0];
+				while (fgets(pfilename, 254, fp))
 				{
-					int len = strlen(filename);
-					if (len <= 0 || filename[0] == '\0')
+					int len = strlen(pfilename);
+					if (len <= 0 || pfilename[0] == '\0')
 						continue;
-					if (filename[len - 1] == '\n')
-						filename[len - 1] = '\0';
-					if (filename[0] == '\0')
+					if (pfilename[len - 1] == '\n')
+					{
+						pfilename[len - 1] = '\0';
+						len--;
+					}
+					if (len >= 2 && pfilename[0] == '"' && pfilename[len - 1] == '"')
+					{
+						pfilename[len - 1] = '\0';
+						len -= 2;
+						pfilename++;
+					}
+					if (len <= 0 || pfilename[0] == '\0')
 						continue;
 					
-					log_debug("searching path %s for %s", filename, opts.query);
+					log_debug("searching path %s for %s", pfilename, opts.query);
 					symhash = NULL;
 					ignores *ig = init_ignore(root_ignores, "", 0);
 					struct stat s = {.st_dev = 0 };
@@ -221,13 +231,13 @@ int main(int argc, char **argv) {
 						/* The device is ignored if opts.one_dev is false, so it's fine
 						 * to leave it at the default 0
 						 */
-					if (opts.one_dev && lstat(filename, &s) == -1) {
-						log_err("Failed to get device information for path %s. Skipping...", filename);
+					if (opts.one_dev && lstat(pfilename, &s) == -1) {
+						log_err("Failed to get device information for path %s. Skipping...", pfilename);
 					}
 #endif
 					char real_path[PATH_MAX];
-					realpath(filename, real_path);
-					search_dir(ig, real_path, filename, 0, s.st_dev);
+					realpath(pfilename, real_path);
+					search_dir(ig, real_path, pfilename, 0, s.st_dev);
 					cleanup_ignore(ig);
 				}
 				fclose(fp);

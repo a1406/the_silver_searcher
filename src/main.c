@@ -203,9 +203,9 @@ int main(int argc, char **argv) {
 			if (fp)
 			{
 				char filename[255];
-				char *pfilename = &filename[0];
-				while (fgets(pfilename, 254, fp))
+				while (fgets(filename, 254, fp))
 				{
+					char *pfilename = &filename[0];
 					int len = strlen(pfilename);
 					if (len <= 0 || pfilename[0] == '\0')
 						continue;
@@ -216,9 +216,12 @@ int main(int argc, char **argv) {
 					}
 					if (len >= 2 && pfilename[0] == '"' && pfilename[len - 1] == '"')
 					{
+//						printf("old path[%p] = %s\n", pfilename, pfilename);
 						pfilename[len - 1] = '\0';
 						len -= 2;
 						pfilename++;
+//						printf("new path[%p] = %s\n", pfilename, pfilename);
+//						continue;
 					}
 					if (len <= 0 || pfilename[0] == '\0')
 						continue;

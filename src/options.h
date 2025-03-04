@@ -60,6 +60,7 @@ typedef struct {
     int print_break;
     int print_count;
     int print_filename_only;
+    int print_nonmatching_files;
     int print_path;
     int print_all_paths;
     int print_line_numbers;
@@ -92,7 +93,7 @@ typedef struct {
 } cli_options;
 
 /* global options. parse_options gives it sane values, everything else reads from it */
-cli_options opts;
+extern cli_options opts;
 
 typedef struct option option_t;
 

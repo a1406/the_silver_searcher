@@ -12,7 +12,7 @@
 #include "log.h"
 #include "options.h"
 
-FILE *out_fd;
+extern FILE *out_fd;
 
 #ifndef TRUE
 #define TRUE 1
@@ -51,7 +51,7 @@ typedef struct {
 } ag_stats;
 
 
-ag_stats stats;
+extern ag_stats stats;
 
 /* Union to translate between chars and words without violating strict aliasing */
 typedef union {
@@ -69,6 +69,7 @@ void generate_hash(const char *find, const size_t f_len, uint8_t *H, const int c
 
 /* max is already defined on spec-violating compilers such as MinGW */
 size_t ag_max(size_t a, size_t b);
+size_t ag_min(size_t a, size_t b);
 
 const char *boyer_moore_strnstr(const char *s, const char *find, const size_t s_len, const size_t f_len,
                                 const size_t alpha_skip_lookup[], const size_t *find_skip_lookup, const int case_insensitive);
